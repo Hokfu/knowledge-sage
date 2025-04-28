@@ -2,13 +2,17 @@ from src.agent.sage import generate_sage
 from src.agent.animal import generate_animal_knowledge
 from src.agent.history import generate_history_knowledge
 from src.agent.science import generate_science_knowledge
-from src.state import DetailedLevel, KnowledgeState
+from src.state import DetailedLevel, KnowledgeState, TargetAudience
 from langgraph.graph import StateGraph, END
+
 
 def get_agent(state: KnowledgeState):
     return state["agent"]
 
-def run_graph(message: str, target_audience: str, detailed_level: DetailedLevel):
+
+def run_graph(
+    message: str, target_audience: TargetAudience, detailed_level: DetailedLevel
+) -> dict:
     builder = StateGraph(KnowledgeState)
     builder.add_node("sage", generate_sage)
     builder.add_node("animal", generate_animal_knowledge)
@@ -20,5 +24,10 @@ def run_graph(message: str, target_audience: str, detailed_level: DetailedLevel)
     builder.add_edge("history", END)
     builder.add_edge("science", END)
     graph = builder.compile()
-    state = KnowledgeState(message=message, target_audience=target_audience, detailed_level=detailed_level)
-    return graph.invoke(state)
+    state = KnowledgeState(
+        message=message,
+        target_audience=target_audience,
+        detailed_level=detailed_level,
+    )
+    result = graph.invoke(state)
+    return result
